@@ -330,7 +330,7 @@ footer {
  *  タブレット/スマートフォン向けデザイン
  ================================================*/
 /* スクロールバーを考慮して20px大きいサイズで切り替え */
-@media screen and (max-width:799px) {
+@media screen and (max-width:1247px) {
 	body {
 		box-sizing:border-box;
 		width:100%;
