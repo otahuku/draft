@@ -100,8 +100,8 @@ var npick=0;
 function picktimer(npick)
 {
   cnt = npick;
-  audio[0].play()
-  audio[1].play()
+  audio[0].load()
+  audio[1].load()
   audio[2].play();
   slidesw();
 }
