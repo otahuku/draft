@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<title>DraftTimer</title>
+<meta charset="utf-8">
+<meta name="description" content="ドラフト用タイマー"
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<link rel="stylesheet" href="./main.css">
+ 
+<!-- href属性にファビコンファイルのURIを記述 -->
+<link rel="shortcut icon" href="">
+ 
+<!-- コメントアウトしてあるコードは、iOS/Android用のアイコン指定 -->
+<!--
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="icon" sizes="196x196" href="">
+<link rel="apple-touch-icon" sizes="152x152" href="">
+-->
+    
+<link rel="canonical" href="./index.html">
+
+<script src="./timer.js"></script>
+
+</head>
+<body>
+<div id="contents">
+	<h2 id="sample">ドラフト用タイマー</h2>
+	<p>
+	ピック間に3秒のインターバルが有ります。
+	</p>
+    
+    <h2>タイマー</h2>
+    <form name="form1" action="">
+       <img src="img/0.png" id="sd" width="320" height="240" alt="">
+        <br>
+        <form name="slide">
+            <input type="button" value="開始" onclick="picktimer(0)">
+        </form>
+    </form>  
+    
+<!-- スクリプトでブロッキングを起こすものはここに記述
+ブロッキングを起こす原因としては、CSSのセレクタ操作（IE）、負荷の高いDOM操作、多数のスクリプトなど -->
+<!-- SCRIPTS -->
+<!-- 例: <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+</body>
+</html>
