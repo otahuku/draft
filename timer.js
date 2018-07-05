@@ -41,8 +41,10 @@ var ncheck=0;
 function picktimer(npick)
 {
   cnt = npick;
-  audio[0].load();
-  audio[1].load();
+  audio[0].muted=true;
+  audio[0].play();
+  audio[1].muted=true;
+  audio[1].play();
   audio[2].play();
   slidesw();
 }
@@ -51,7 +53,8 @@ function checktimer(ncheck)
 {
   //チェックタイム
   cnt = ncheck;
-  audio[0].load();
+  audio[0].muted=true;
+  audio[0].play();
   audio[3].play();
   slidesw();
 }
@@ -72,10 +75,12 @@ function slidesw()
     //一つ画像を表示したらカウント用変数cntの値を＋１にする
     cnt--;
     if( cnt <= 9){
+      audio[0].muted=false;
       audio[0].play();
     }
     
     if(cnt == -1){
+      audio[1].muted=false;
       audio[1].play();
     }
       
