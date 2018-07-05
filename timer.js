@@ -41,6 +41,8 @@ var ncheck=0;
 function picktimer(npick)
 {
   cnt = npick;
+  audio[0].load();
+  audio[1].load();
   audio[2].play();
   slidesw();
 }
@@ -49,6 +51,7 @@ function checktimer(ncheck)
 {
   //チェックタイム
   cnt = ncheck;
+  audio[0].load();
   audio[3].play();
   slidesw();
 }
