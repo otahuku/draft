@@ -33,11 +33,12 @@ audio[2].src="mp3/03_pickup.mp3";
 audio[3]=new Audio();
 audio[3].src="mp3/04_pickcheck.mp3";
 
-var picktime=[40,40,35,30,25,25,20,20,15,10,10,5,5,5,5];
+//var picktime=[40,40,35,30,25,25,20,20,15,10,10,5,5,5,5];
+var picktime=[40,40,35,30,25,25,20,20,15,10,10,5,5,5,0];
 var cnt=0;
 var npick=0;
 var ncheck=0;
-var interval=5000;
+//var interval=5000;
 
 function picktimer(npick)
 {
