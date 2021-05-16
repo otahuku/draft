@@ -102,7 +102,5 @@ function slidesw()
       var timer2=setTimeout("picktimer(picktime[npick])",interval);
       interval = interval - 200;
     }
-
-    //clearTimeout(timer2);
   }
 }
