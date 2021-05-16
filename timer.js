@@ -99,7 +99,8 @@ function slidesw()
       npick++;
 
       //intervalの時間は1ピックで200ミリ秒減る
-      var timer2=setTimeout("picktimer(picktime[npick])",interval);
+      var timer2=setTimeout("picktimer(picktime[npick])",5000);
+      //var timer2=setTimeout("picktimer(picktime[npick])",interval);
       //interval=interval - 200;
     }
   }
