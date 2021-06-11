@@ -39,9 +39,12 @@ var npick=0;
 var ncheck=0;
 var interval=5000;
 
-function picktimer(npick)
+function picktimer(npick, isMo)
 {
   cnt = npick;
+  if(isMo){
+    picktime=[60,50,50,45,40,35,30,25,20,15,10,5,5,5,5];
+  }
   audio[0].muted=true;
   audio[0].play();
   audio[1].muted=true;
