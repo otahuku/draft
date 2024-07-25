@@ -7,7 +7,7 @@ const audioFiles = [
 ];
 
 let audio = [];
-let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
+let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5];
 let cnt = 0;
 let npick = 0;
 let interval = 5000; // 初期インターバルを5000ミリ秒（5秒）に設定
@@ -93,7 +93,7 @@ function playAudio(index, muted = false) {
 function picktimer(isMo) {
   clearInterval(timerInterval);
   if (isMo) {
-      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
+      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5];
   }
   cnt = picktime[npick];
   isCheckTimer = false;
@@ -115,13 +115,6 @@ function checktimer(time) {
   // チェック音を鳴らしつつ、即座にカウントダウンを開始
   playAudio(3).catch(error => console.error('Failed to play check sound', error));
   slidesw();
-}
-
-function updateDisplayAndPlayAudio(time) {
-  updateDisplay(time);
-  if (time <= 10 & time != 0) {
-      playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
-  }
 }
 
 function playDraftSoundAndProceed() {
@@ -167,7 +160,7 @@ function slidesw() {
       if (currentSecond !== lastSecond) {
           lastSecond = currentSecond;
           updateDisplay(currentSecond);
-          if (currentSecond === 9) {
+          if (currentSecond < 11 & currentSecond != 0) {
               playAudio(0).catch(error => console.error('Failed to play countdown sound', error));
           }
       }
