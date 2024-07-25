@@ -98,7 +98,10 @@ function picktimer(isMo) {
   cnt = picktime[npick];
   isCheckTimer = false;
   console.log(`Starting pick timer: ${cnt} seconds`);
-  playAudio(2).then(slidesw); // ピックアップ音を鳴らした後にslidesw開始
+  
+  // ピックアップ音を鳴らしつつ、即座にカウントダウンを開始
+  playAudio(2).catch(error => console.error('Failed to play pickup sound', error));
+  slidesw();
 }
 
 function checktimer(time) {
@@ -108,7 +111,10 @@ function checktimer(time) {
   interval = 5000; // インターバルをリセット
   isCheckTimer = true;
   console.log(`Starting check timer: ${cnt} seconds`);
-  playAudio(3).then(slidesw); // チェック音を鳴らした後にslidesw開始
+  
+  // チェック音を鳴らしつつ、即座にカウントダウンを開始
+  playAudio(3).catch(error => console.error('Failed to play check sound', error));
+  slidesw();
 }
 
 function updateDisplayAndPlayAudio(time) {
@@ -160,7 +166,10 @@ function slidesw() {
       
       if (currentSecond !== lastSecond) {
           lastSecond = currentSecond;
-          updateDisplayAndPlayAudio(currentSecond);
+          updateDisplay(currentSecond);
+          if (currentSecond === 9) {
+              playAudio(0).catch(error => console.error('Failed to play countdown sound', error));
+          }
       }
 
       if (currentSecond > 0) {
@@ -170,6 +179,7 @@ function slidesw() {
       }
   };
   
+  updateDisplay(cnt); // 即座に初期表示を更新
   tick();
 }
 
