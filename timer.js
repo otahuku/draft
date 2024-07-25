@@ -57,28 +57,48 @@ function playAudio(index, muted = false) {
   }
 }
 
-function picktimer(time, isMo) {
-    clearInterval(timerInterval);
-    if (isMo) {
-        picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
-    }
-    cnt = picktime[npick]; // npickに基づいて正しい時間を設定
-    isCheckTimer = false;
-    playAudio(2).then(slidesw); // ピックアップ音を鳴らした後にslidesw開始
+function picktimer(isMo) {
+  clearInterval(timerInterval);
+  if (isMo) {
+      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
+  }
+  cnt = picktime[npick];  // 現在の npick に基づいて時間を設定
+  isCheckTimer = false;
+  console.log(`Starting pick timer: ${cnt} seconds`);  // デバッグ情報
+  playAudio(2).then(slidesw); // ピックアップ音を鳴らした後にslidesw開始
+}
+
+function proceedToNextPick() {
+  if (!isCheckTimer) {
+      npick++;
+      if (npick < picktime.length) {
+          interval = Math.max(interval - 200, MIN_INTERVAL);
+          console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
+          setTimeout(() => picktimer(false), interval);
+      } else {
+          console.log('All picks completed');
+          updateDisplay(0);
+          npick = 0; // npickをリセット
+          interval = 5000; // インターバルをリセット
+      }
+  } else {
+      updateDisplay(0);
+  }
 }
 
 function checktimer(time) {
-    clearInterval(timerInterval);
-    cnt = time;
-    npick = 0; // チェックタイマー開始時にnpickをリセット
-    interval = 5000; // インターバルをリセット
-    isCheckTimer = true;
-    playAudio(3).then(slidesw); // チェック音を鳴らした後にslidesw開始
+  clearInterval(timerInterval);
+  cnt = time;
+  npick = 0; // チェックタイマー開始時にnpickをリセット
+  interval = 5000; // インターバルをリセット
+  isCheckTimer = true;
+  console.log(`Starting check timer: ${cnt} seconds`);  // デバッグ情報
+  playAudio(3).then(slidesw); // チェック音を鳴らした後にslidesw開始
 }
 
 function updateDisplayAndPlayAudio(time) {
   updateDisplay(time);
-  if (time <= 11 & cnt != 0) {
+  if (time < 11 & cnt != 0) {
       playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
   }
 }
