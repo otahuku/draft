@@ -10,6 +10,7 @@ let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
 let cnt = 0;
 let npick = 0;
 let interval = 5000;
+let timerInterval;
 
 function updateDisplay(time) {
   const left = Math.floor(time / 10);
@@ -18,8 +19,9 @@ function updateDisplay(time) {
   document.getElementById('right').textContent = right;
 }
 
-function picktimer(npick, isMo) {
-  cnt = npick;
+function picktimer(time, isMo) {
+  clearInterval(timerInterval);
+  cnt = time;
   if (isMo) {
       picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
   }
@@ -28,38 +30,42 @@ function picktimer(npick, isMo) {
   audio[1].muted = true;
   audio[1].play();
   audio[2].play();
-  slidesw();
+  startCountdown();
 }
 
-function checktimer(ncheck) {
-  cnt = ncheck;
+function checktimer(time) {
+  clearInterval(timerInterval);
+  cnt = time;
   audio[0].muted = true;
   audio[0].play();
   audio[3].play();
-  slidesw();
+  startCountdown();
 }
 
-function slidesw() {
+function startCountdown() {
   updateDisplay(cnt);
+  
+  timerInterval = setInterval(() => {
+      cnt--;
+      updateDisplay(cnt);
 
-  cnt--;
-  if (cnt <= 9) {
-      audio[0].muted = false;
-      audio[0].play();
-  }
+      if (cnt <= 9 && cnt > 0) {
+          audio[0].muted = false;
+          audio[0].play();
+      }
 
-  if (cnt === -1) {
-      audio[1].muted = false;
-      audio[1].play();
-  }
-
-  if (cnt >= 0) {
-      setTimeout(slidesw, 1000);
-  } else {
-      npick++;
-      interval = Math.max(interval - 200, 1000); // Ensure interval doesn't go below 1 second
-      setTimeout(() => picktimer(picktime[npick]), interval);
-  }
+      if (cnt === 0) {
+          clearInterval(timerInterval);
+          audio[1].muted = false;
+          audio[1].play();
+          npick++;
+          
+          if (npick < picktime.length) {
+              interval = Math.max(interval - 200, 1000); // Ensure interval doesn't go below 1 second
+              setTimeout(() => picktimer(picktime[npick], false), interval);
+          }
+      }
+  }, 1000);
 }
 
 // Initialize display
