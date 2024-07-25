@@ -12,7 +12,7 @@ const audio = audioFiles.map(file => {
   return audioElement;
 });
 
-let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
+let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5];
 let cnt = 0;
 let npick = 0;
 let interval = 5000;
@@ -40,7 +40,7 @@ function picktimer(time, isMo) {
   clearInterval(timerInterval);
   cnt = time;
   if (isMo) {
-      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
+      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5];
   }
   playAudio(0, true);
   playAudio(1, true);
@@ -53,7 +53,7 @@ function checktimer(time) {
   cnt = time;
   playAudio(0, true);
   playAudio(3);
-  startCountdown();
+  startOnceCountdown();
 }
 
 function startCountdown() {
@@ -76,6 +76,25 @@ function startCountdown() {
               interval = Math.max(interval - 200, 1000);
               setTimeout(() => picktimer(picktime[npick], false), interval);
           }
+      }
+  }, 1000);
+}
+
+
+function startOnceCountdown() {
+  updateDisplay(cnt);
+  
+  timerInterval = setInterval(() => {
+      cnt--;
+      updateDisplay(cnt);
+
+      if (cnt <= 9 && cnt > 0) {
+          playAudio(0);
+      }
+
+      if (cnt === 0) {
+          clearInterval(timerInterval);
+          playAudio(1);
       }
   }, 1000);
 }
