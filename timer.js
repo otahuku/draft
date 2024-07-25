@@ -73,7 +73,7 @@ function checktimer(time) {
 function slidesw() {
   updateDisplay(cnt);
   
-  if (cnt === 9) {
+  if (cnt <= 9 && cnt != 0) {
       playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
       console.log('Attempting to play countdown sound');
   }
