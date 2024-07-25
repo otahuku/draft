@@ -10,6 +10,8 @@ let audio = [];
 let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
 let cnt = 0;
 let npick = 0;
+let interval = 5000; // 初期インターバルを5000ミリ秒（5秒）に設定
+const MIN_INTERVAL = 1000; // 最小インターバルを1000ミリ秒（1秒）に設定
 let timerInterval;
 let audioEnabled = false;
 
@@ -57,7 +59,6 @@ function picktimer(time, isMo) {
   if (isMo) {
       picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
   }
-  npick = 0; // npickをリセット
   playAudio(2); // ピックアップ音を鳴らす
   slidesw();
 }
@@ -66,6 +67,7 @@ function checktimer(time) {
   clearInterval(timerInterval);
   cnt = time;
   npick = 0; // npickをリセット
+  interval = 5000; // インターバルをリセット
   playAudio(3); // チェック音を鳴らす
   slidesw();
 }
@@ -73,9 +75,9 @@ function checktimer(time) {
 function slidesw() {
   updateDisplay(cnt);
   
-  if (cnt <= 9 && cnt != 0) {
-      playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
-      console.log('Attempting to play countdown sound');
+  if (cnt <= 10 && cnt != 0) {
+    playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
+    console.log('Attempting to play countdown sound');
   }
   
   if (cnt > 0) {
@@ -88,9 +90,14 @@ function slidesw() {
       console.log('Attempting to play draft sound');
       npick++;
       if (npick < picktime.length) {
-          setTimeout(() => picktimer(picktime[npick], false), 5000); // 5秒後に次のカウントダウン
+          // インターバルを200ミリ秒減少させる（最小値は MIN_INTERVAL）
+          interval = Math.max(interval - 200, MIN_INTERVAL);
+          console.log(`Next interval: ${interval}ms, Next pick time: ${picktime[npick]}s`);
+          setTimeout(() => picktimer(picktime[npick], false), interval);
       } else {
           updateDisplay(0); // 全てのカウントダウンが終了したら0を表示
+          npick = 0; // npickをリセット
+          interval = 5000; // インターバルをリセット
       }
   }
 }
