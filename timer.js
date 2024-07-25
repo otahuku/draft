@@ -34,21 +34,18 @@ function updateDisplay(time) {
 }
 
 function playAudio(index, muted = false) {
-  if (!audioEnabled && isIOS) {
-      console.log('Audio not enabled on iOS');
+  if (!audioEnabled) {
+      console.log('Audio not enabled');
       return;
   }
   if (audio[index]) {
       audio[index].muted = muted;
       audio[index].currentTime = 0;
-      const playPromise = audio[index].play();
-      if (playPromise !== undefined) {
-          playPromise.then(_ => {
-              console.log(`Playing audio ${index}`);
-          }).catch(error => {
-              console.error('Audio playback failed', error);
-          });
-      }
+      audio[index].play().then(() => {
+          console.log(`Playing audio ${index}`);
+      }).catch(error => {
+          console.error('Audio playback failed', error);
+      });
   } else {
       console.error(`Audio file at index ${index} not found`);
   }
@@ -98,24 +95,32 @@ function slidesw() {
   }
 }
 
+function enableAudio() {
+  audioEnabled = true;
+  audio.forEach(a => a.play().then(() => a.pause()).catch(e => console.error('Error enabling audio:', e)));
+  console.log('Audio enabled');
+}
+
 // 初期化と初期表示
 document.addEventListener('DOMContentLoaded', () => {
   initializeAudio();
   updateDisplay(0);
   
-  // iOS向けの音声有効化ボタンを追加
   if (isIOS) {
       const enableAudioButton = document.createElement('button');
       enableAudioButton.textContent = '音声を有効化';
       enableAudioButton.className = 'btn bg-purple-500 hover:bg-purple-600 text-white font-bold py-2 px-4 rounded';
       enableAudioButton.onclick = function() {
-          audioEnabled = true;
-          audio.forEach(a => a.play().then(() => a.pause()).catch(e => console.error('Error enabling audio:', e)));
+          enableAudio();
           this.style.display = 'none';
-          console.log('Audio enabled on iOS');
       };
       document.querySelector('.container').prepend(enableAudioButton);
   } else {
-      audioEnabled = true;
+      // iOS以外の環境では最初のユーザーインタラクションで音声を有効化
+      document.body.addEventListener('click', function() {
+          if (!audioEnabled) {
+              enableAudio();
+          }
+      }, { once: true });
   }
 });
