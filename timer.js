@@ -8,15 +8,18 @@ const audioFiles = [
 
 const audio = audioFiles.map(file => {
   const audioElement = new Audio(file);
+  audioElement.preload = 'auto';  // 先行ロードを設定
+  audioElement.load();  // 明示的にロードを開始
   audioElement.onerror = () => console.error(`Failed to load audio file: ${file}`);
   return audioElement;
 });
 
-let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5];
+let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
 let cnt = 0;
 let npick = 0;
 let interval = 5000;
 let timerInterval;
+let lastPlayedTime = 0;
 
 function updateDisplay(time) {
   const timerDisplay = document.getElementById('timerDisplay');
@@ -29,8 +32,19 @@ function updateDisplay(time) {
 
 function playAudio(index, muted = false) {
   if (audio[index]) {
+      const currentTime = Date.now();
+      if (currentTime - lastPlayedTime < 200) {
+          console.log('Skipping audio playback due to rapid succession');
+          return;
+      }
+      lastPlayedTime = currentTime;
+
       audio[index].muted = muted;
-      audio[index].play().catch(e => console.error('Audio playback failed', e));
+      audio[index].currentTime = 0;  // 再生位置をリセット
+      const playPromise = audio[index].play();
+      if (playPromise !== undefined) {
+          playPromise.catch(e => console.error('Audio playback failed', e));
+      }
   } else {
       console.error(`Audio file at index ${index} not found`);
   }
@@ -40,7 +54,7 @@ function picktimer(time, isMo) {
   clearInterval(timerInterval);
   cnt = time;
   if (isMo) {
-      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5];
+      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
   }
   playAudio(0, true);
   playAudio(1, true);
@@ -80,7 +94,6 @@ function startCountdown() {
   }, 1000);
 }
 
-
 function startOnceCountdown() {
   updateDisplay(cnt);
   
@@ -99,7 +112,15 @@ function startOnceCountdown() {
   }, 1000);
 }
 
-// Initialize display when DOM is fully loaded
+// Initialize audio and display when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
+  audio.forEach(a => {
+      a.load();  // 全ての音声ファイルを明示的にロード
+      // iOS Safariでの自動再生制限に対処
+      a.play().then(() => {
+          a.pause();
+          a.currentTime = 0;
+      }).catch(e => console.log('Audio preload failed, but this is okay', e));
+  });
   updateDisplay(0);
 });
