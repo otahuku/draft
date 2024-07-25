@@ -160,7 +160,7 @@ function slidesw() {
       if (currentSecond !== lastSecond) {
           lastSecond = currentSecond;
           updateDisplay(currentSecond);
-          if (currentSecond < 11 & currentSecond != 0) {
+          if (currentSecond < 10 & currentSecond != 0) {
               playAudio(0).catch(error => console.error('Failed to play countdown sound', error));
           }
       }
