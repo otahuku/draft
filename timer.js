@@ -16,7 +16,6 @@ const audio = [
 let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
 let cnt = 0;
 let npick = 0;
-let interval = 5000;
 let timerInterval;
 
 function updateDisplay(time) {
@@ -45,39 +44,38 @@ function picktimer(time, isMo) {
   if (isMo) {
       picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
   }
-  playAudio(0, true);
-  playAudio(1, true);
-  playAudio(2);
+  npick = 0; // npickをリセット
+  playAudio(2); // ピックアップ音を鳴らす
   slidesw();
 }
 
 function checktimer(time) {
   clearInterval(timerInterval);
   cnt = time;
-  playAudio(0, true);
-  playAudio(3);
+  npick = 0; // npickをリセット
+  playAudio(3); // チェック音を鳴らす
   slidesw();
 }
 
 function slidesw() {
   updateDisplay(cnt);
   
-  cnt--;
-  if (cnt <= 9 && cnt >= 0) {
-      playAudio(0);
+  if (cnt <= 9 && cnt > 0) {
+      playAudio(0); // 9秒から1秒までカウントダウン音を鳴らす
   }
   
-  if (cnt === -1) {
-      playAudio(1);
-  }
-  
-  if (cnt >= 0) {
-      timerInterval = setTimeout(slidesw, 1000);
+  if (cnt > 0) {
+      timerInterval = setTimeout(() => {
+          cnt--;
+          slidesw();
+      }, 1000);
   } else {
+      playAudio(1); // ドラフト音を鳴らす
       npick++;
       if (npick < picktime.length) {
-          interval = Math.max(interval - 200, 1000);
-          setTimeout(() => picktimer(picktime[npick], false), interval);
+          setTimeout(() => picktimer(picktime[npick], false), 5000); // 5秒後に次のカウントダウン
+      } else {
+          updateDisplay(0); // 全てのカウントダウンが終了したら0を表示
       }
   }
 }
