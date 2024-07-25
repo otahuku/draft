@@ -15,7 +15,8 @@ const MIN_INTERVAL = 1000; // 最小インターバルを1000ミリ秒（1秒）
 let timerInterval;
 let audioEnabled = false;
 let isCheckTimer = false; // チェックタイマーかどうかのフラグ
-
+let lastPlayedTime = 0;
+const PLAY_COOLDOWN = 300; // ミリ秒単位でのクールダウン時間
 // iOS判定（ChromeとSafariの両方に対応）
 const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
 
@@ -28,6 +29,44 @@ function initializeAudio() {
   });
   console.log('Audio files initialized');
 }
+
+function playAudio(index, muted = false) {
+  return new Promise((resolve, reject) => {
+      if (!audioEnabled) {
+          console.log('Audio not enabled, skipping playback');
+          resolve();
+          return;
+      }
+      const currentTime = Date.now();
+      if (currentTime - lastPlayedTime < PLAY_COOLDOWN) {
+          console.log(`Skipping audio ${index} due to cooldown`);
+          resolve();
+          return;
+      }
+      if (audio[index]) {
+          audio[index].muted = muted;
+          audio[index].currentTime = 0;
+          const playPromise = audio[index].play();
+          if (playPromise !== undefined) {
+              playPromise.then(() => {
+                  console.log(`Playing audio ${index}`);
+                  lastPlayedTime = currentTime;
+                  resolve();
+              }).catch(error => {
+                  console.error('Audio playback failed', error);
+                  resolve(); // エラーが発生しても処理を続行
+              });
+          } else {
+              console.log(`Play promise undefined for audio ${index}`);
+              resolve();
+          }
+      } else {
+          console.error(`Audio file at index ${index} not found`);
+          resolve();
+      }
+  });
+}
+
 
 function updateDisplay(time) {
   const timerDisplay = document.getElementById('timerDisplay');
@@ -57,97 +96,82 @@ function playAudio(index, muted = false) {
   }
 }
 
-function picktimer(isMo) {
-  clearInterval(timerInterval);
-  if (isMo) {
-      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
-  }
-  cnt = picktime[npick];  // 現在の npick に基づいて時間を設定
-  isCheckTimer = false;
-  console.log(`Starting pick timer: ${cnt} seconds`);  // デバッグ情報
-  playAudio(2).then(slidesw); // ピックアップ音を鳴らした後にslidesw開始
-}
-
-function proceedToNextPick() {
-  if (!isCheckTimer) {
-      npick++;
-      if (npick < picktime.length) {
-          interval = Math.max(interval - 200, MIN_INTERVAL);
-          console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
-          setTimeout(() => picktimer(false), interval);
-      } else {
-          console.log('All picks completed');
-          updateDisplay(0);
-          npick = 0; // npickをリセット
-          interval = 5000; // インターバルをリセット
-      }
-  } else {
-      updateDisplay(0);
-  }
+function picktimer(time, isMo) {
+    clearInterval(timerInterval);
+    if (isMo) {
+        picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
+    }
+    cnt = picktime[npick]; // npickに基づいて正しい時間を設定
+    isCheckTimer = false;
+    playAudio(2).then(slidesw); // ピックアップ音を鳴らした後にslidesw開始
 }
 
 function checktimer(time) {
-  clearInterval(timerInterval);
-  cnt = time;
-  npick = 0; // チェックタイマー開始時にnpickをリセット
-  interval = 5000; // インターバルをリセット
-  isCheckTimer = true;
-  console.log(`Starting check timer: ${cnt} seconds`);  // デバッグ情報
-  playAudio(3).then(slidesw); // チェック音を鳴らした後にslidesw開始
+    clearInterval(timerInterval);
+    cnt = time;
+    npick = 0; // チェックタイマー開始時にnpickをリセット
+    interval = 5000; // インターバルをリセット
+    isCheckTimer = true;
+    playAudio(3).then(slidesw); // チェック音を鳴らした後にslidesw開始
 }
 
-function updateDisplayAndPlayAudio(time) {
-  updateDisplay(time);
-  if (time < 11 & cnt != 0) {
+
+function slidesw() {
+  updateDisplay(cnt);
+  
+  if (cnt === 9) {
       playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
+  }
+  
+  if (cnt > 0) {
+      timerInterval = setTimeout(() => {
+          cnt--;
+          slidesw();
+      }, 1000);
+  } else {
+      clearInterval(timerInterval);
+      console.log('Attempting to play draft sound');
+      playAudio(1)
+          .then(() => {
+              console.log('Draft sound played successfully');
+              if (!isCheckTimer) {
+                  npick++;
+                  if (npick < picktime.length) {
+                      interval = Math.max(interval - 200, MIN_INTERVAL);
+                      console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
+                      setTimeout(() => picktimer(picktime[npick], false), interval);
+                  } else {
+                      console.log('All picks completed');
+                      updateDisplay(0);
+                      npick = 0;
+                      interval = 5000;
+                  }
+              } else {
+                  updateDisplay(0);
+              }
+          })
+          .catch(error => {
+              console.error('Failed to play draft sound', error);
+              // エラーが発生しても次の処理を続行
+              if (!isCheckTimer) {
+                  npick++;
+                  if (npick < picktime.length) {
+                      interval = Math.max(interval - 200, MIN_INTERVAL);
+                      console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
+                      setTimeout(() => picktimer(picktime[npick], false), interval);
+                  } else {
+                      console.log('All picks completed');
+                      updateDisplay(0);
+                      npick = 0;
+                      interval = 5000;
+                  }
+              } else {
+                  updateDisplay(0);
+              }
+          });
   }
 }
 
-function slidesw() {
-  const startTime = Date.now();
-  const tick = () => {
-      const elapsedTime = Date.now() - startTime;
-      const secondsElapsed = Math.floor(elapsedTime / 1000);
-      
-      if (secondsElapsed < cnt) {
-          updateDisplayAndPlayAudio(cnt - secondsElapsed);
-          requestAnimationFrame(tick);
-      } else if (cnt > 0) {
-          cnt--;
-          updateDisplayAndPlayAudio(cnt);
-          setTimeout(slidesw, 1000 - (elapsedTime % 1000));
-      } else {
-          clearInterval(timerInterval);
-          console.log('Attempting to play draft sound');
-          playAudio(1)
-              .then(() => {
-                  console.log('Draft sound played successfully');
-                  if (!isCheckTimer) {
-                      npick++;
-                      if (npick < picktime.length) {
-                          interval = Math.max(interval - 200, MIN_INTERVAL);
-                          console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
-                          setTimeout(() => picktimer(picktime[npick], false), interval);
-                      } else {
-                          console.log('All picks completed');
-                          updateDisplay(0);
-                          npick = 0;
-                          interval = 5000;
-                      }
-                  } else {
-                      updateDisplay(0);
-                  }
-              })
-              .catch(error => {
-                  console.error('Failed to play draft sound', error);
-                  // エラーが発生しても次の処理を続行
-                  // ... (エラー処理のコードは前回と同じ)
-              });
-      }
-  };
-  
-  tick();
-}
 
 function enableAudio() {
   audioEnabled = true;
