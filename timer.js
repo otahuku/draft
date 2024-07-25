@@ -16,7 +16,46 @@ let timerInterval;
 let audioEnabled = false;
 let isCheckTimer = false; // チェックタイマーかどうかのフラグ
 
-// 中略（変更のない関数は省略）
+// iOS判定（ChromeとSafariの両方に対応）
+const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) && !window.MSStream;
+
+// 音声ファイルの読み込みと初期化
+function initializeAudio() {
+  audio = audioFiles.map(file => {
+      const audioElement = new Audio(file);
+      audioElement.load();
+      return audioElement;
+  });
+  console.log('Audio files initialized');
+}
+
+function updateDisplay(time) {
+  const timerDisplay = document.getElementById('timerDisplay');
+  if (timerDisplay) {
+      timerDisplay.textContent = time.toString().padStart(2, '0');
+  }
+}
+
+function playAudio(index, muted = false) {
+  if (!audioEnabled) {
+      console.log('Audio not enabled');
+      return Promise.resolve(); // 音声が有効でない場合は即座に解決するPromiseを返す
+  }
+  if (audio[index]) {
+      audio[index].muted = muted;
+      audio[index].currentTime = 0;
+      return audio[index].play()
+          .then(() => console.log(`Playing audio ${index}`))
+          .catch(error => {
+              console.error('Audio playback failed', error);
+              // エラーが発生しても処理を続行するためにresolveしたPromiseを返す
+              return Promise.resolve();
+          });
+  } else {
+      console.error(`Audio file at index ${index} not found`);
+      return Promise.resolve(); // 音声ファイルが見つからない場合も即座に解決するPromiseを返す
+  }
+}
 
 function picktimer(time, isMo) {
     clearInterval(timerInterval);
