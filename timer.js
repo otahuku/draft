@@ -24,104 +24,97 @@ image[9]=new Image();
 image[9].src="img/9.png";
 
 var audio = new Array();
-audio[0]=new Audio();
-audio[0].src="mp3/01_countdown.mp3";
-audio[1]=new Audio();
-audio[1].src="mp3/02_draft.mp3";
-audio[2]=new Audio();
-audio[2].src="mp3/03_pickup.mp3";
-audio[3]=new Audio();
-audio[3].src="mp3/04_pickcheck.mp3";
+var audioSources = [
+  "mp3/01_countdown.mp3",
+  "mp3/02_draft.mp3",
+  "mp3/03_pickup.mp3",
+  "mp3/04_pickcheck.mp3"
+];
 
 var picktime=[40,40,35,30,25,25,20,20,15,10,10,5,5,5,5];
 var cnt=0;
 var npick=0;
 var ncheck=0;
 var interval=5000;
+var audioInitialized = false;
+
+function initializeAudio() {
+  if (!audioInitialized) {
+    audioSources.forEach((src, index) => {
+      audio[index] = new Audio(src);
+      audio[index].load();
+    });
+    audioInitialized = true;
+  }
+}
+
+function playAudio(index, muted = false) {
+  if (audio[index]) {
+    audio[index].muted = muted;
+    audio[index].currentTime = 0;
+    audio[index].play().catch(e => console.error("Audio play failed", e));
+  }
+}
 
 function picktimer(npick, isMo)
 {
+  initializeAudio();
   cnt = npick;
   if(isMo){
     picktime=[60,50,50,45,40,35,30,25,20,15,10,5,5,5,5];
   }
-  audio[0].muted=true;
-  audio[0].play().catch(e => console.error("Audio play failed", e));
-  audio[1].muted=true;
-  audio[1].play().catch(e => console.error("Audio play failed", e));
-  audio[2].play().catch(e => console.error("Audio play failed", e));
+  playAudio(0, true);
+  playAudio(1, true);
+  playAudio(2);
   slidesw();
 }
 
 function checktimer(ncheck)
 {
-  //チェックタイム
+  initializeAudio();
   cnt = ncheck;
-  audio[0].muted=true;
-  audio[0].play().catch(e => console.error("Audio play failed", e));
-  audio[3].play().catch(e => console.error("Audio play failed", e));
+  playAudio(0, true);
+  playAudio(3);
   slidesw();
 }
 
 function slidesw()
 {
-  //getElementByIdが使える場合のみ後の処理をする
   if(document.getElementById)
   {
-    //スライド中はボタンを押せなくする
-    //document.slide.elements[0].disabled=true;
-    //id属性が「sd」の画像タグの画像パスを切り替える
     var left = Math.floor((cnt / 10) % 10);
     var right = Math.floor(cnt % 10);
     document.getElementById("left").src = image[left].src;
     document.getElementById("right").src = image[right].src;
 
-    //一つ画像を表示したらカウント用変数cntの値を＋１にする
     cnt--;
-    if( cnt <= 9){
-      audio[0].muted=false;
-      audio[0].currentTime = 0;
-      audio[0].play().catch(e => console.error("Audio play failed", e));
+    if( cnt <= 9 && cnt >= 0){
+      playAudio(0);
     }
     
     if(cnt == -1){
-      audio[1].muted=false;
-      audio[1].currentTime = 0;
-      audio[1].play().catch(e => console.error("Audio play failed", e));
+      playAudio(1);
     }
       
-    //画像が最後まで表示されたか確認
     if( cnt >= 0 )
     {
-      //まだ表示されていなければ、setTimeout()で次の画像を表示する
-      var timer1=setTimeout("slidesw()",1000);
+      setTimeout(slidesw, 1000);
     }
     else
     {
-      //全て表示されていたら、ボタンを押せるようにして、タイマーを停止する
-      //document.slide.elements[0].disabled=false;
-      //clearTimeout(timer1);
       npick++;
-
       
-      //intervalの時間は1ピックで200ミリ秒減る
-      var timer2=setTimeout("picktimer(picktime[npick])",interval);
-      interval=interval - 200;
+      interval = Math.max(interval - 200, 1000);
+      setTimeout(() => picktimer(picktime[npick]), interval);
     }
   }
 }
 
-// iOS Safari対応のための初期化
+// ユーザーインタラクション後に音声を初期化
+document.addEventListener('click', initializeAudio, { once: true });
+
+// 初期表示
 document.addEventListener('DOMContentLoaded', function() {
-  audio.forEach(function(audioElement) {
-    audioElement.load();
-    audioElement.muted = true;
-    audioElement.play().then(function() {
-      audioElement.pause();
-      audioElement.muted = false;
-      audioElement.currentTime = 0;
-    }).catch(function(error) {
-      console.error("Initial audio play failed", error);
-    });
-  });
+  document.getElementById("left").src = image[0].src;
+  document.getElementById("right").src = image[0].src;
 });
