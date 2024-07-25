@@ -1,10 +1,3 @@
-// 画像を格納する配列の作成
-const images = Array.from({ length: 10 }, (_, i) => {
-  const img = new Image();
-  img.src = `img/${i}.png`;
-  return img;
-});
-
 // 音声ファイルの設定
 const audio = [
   new Audio('mp3/01_countdown.mp3'),
@@ -19,14 +12,9 @@ let npick = 0;
 let timerInterval;
 
 function updateDisplay(time) {
-  const left = Math.floor(time / 10);
-  const right = time % 10;
-  const leftElement = document.getElementById("left");
-  const rightElement = document.getElementById("right");
-  
-  if (leftElement && rightElement) {
-      leftElement.src = images[left].src;
-      rightElement.src = images[right].src;
+  const timerDisplay = document.getElementById('timerDisplay');
+  if (timerDisplay) {
+      timerDisplay.textContent = time.toString().padStart(2, '0');
   }
 }
 
