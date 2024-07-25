@@ -79,7 +79,7 @@ function checktimer(time) {
 function slidesw() {
     updateDisplay(cnt);
     
-    if (cnt <= 10 && cnt != 0) {
+    if (cnt <= 11 && cnt != 0) {
         playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
     }
     
@@ -90,23 +90,45 @@ function slidesw() {
         }, 1000);
     } else {
         clearInterval(timerInterval);
-        playAudio(1).then(() => { // ドラフト音を鳴らす
-            if (!isCheckTimer) {
-                npick++;
-                if (npick < picktime.length) {
-                    interval = Math.max(interval - 200, MIN_INTERVAL);
-                    console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
-                    setTimeout(() => picktimer(picktime[npick], false), interval);
+        
+        playAudio(1)
+            .then(() => {
+                console.log('Draft sound played successfully');
+                if (!isCheckTimer) {
+                    npick++;
+                    if (npick < picktime.length) {
+                        interval = Math.max(interval - 200, MIN_INTERVAL);
+                        console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
+                        setTimeout(() => picktimer(picktime[npick], false), interval);
+                    } else {
+                        console.log('All picks completed');
+                        updateDisplay(0);
+                        npick = 0;
+                        interval = 5000;
+                    }
                 } else {
-                    console.log('All picks completed');
-                    updateDisplay(0); // 全てのカウントダウンが終了したら0を表示
-                    npick = 0; // npickをリセット
-                    interval = 5000; // インターバルをリセット
+                    updateDisplay(0);
                 }
-            } else {
-                updateDisplay(0); // チェックタイマーが終了したら0を表示
-            }
-        });
+            })
+            .catch(error => {
+                console.error('Failed to play draft sound', error);
+                // エラーが発生しても次の処理を続行
+                if (!isCheckTimer) {
+                    npick++;
+                    if (npick < picktime.length) {
+                        interval = Math.max(interval - 200, MIN_INTERVAL);
+                        console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
+                        setTimeout(() => picktimer(picktime[npick], false), interval);
+                    } else {
+                        console.log('All picks completed');
+                        updateDisplay(0);
+                        npick = 0;
+                        interval = 5000;
+                    }
+                } else {
+                    updateDisplay(0);
+                }
+            });
     }
 }
 
