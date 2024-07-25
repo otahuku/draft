@@ -13,10 +13,8 @@ let interval = 5000;
 let timerInterval;
 
 function updateDisplay(time) {
-  const left = Math.floor(time / 10);
-  const right = time % 10;
-  document.getElementById('left').textContent = left;
-  document.getElementById('right').textContent = right;
+  const timerDisplay = document.getElementById('timerDisplay');
+  timerDisplay.textContent = time.toString().padStart(2, '0');
 }
 
 function picktimer(time, isMo) {
