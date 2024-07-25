@@ -8,8 +8,7 @@ const audioFiles = [
 
 const audio = audioFiles.map(file => {
   const audioElement = new Audio(file);
-  audioElement.preload = 'auto';  // 先行ロードを設定
-  audioElement.load();  // 明示的にロードを開始
+  audioElement.preload = 'auto';
   audioElement.onerror = () => console.error(`Failed to load audio file: ${file}`);
   return audioElement;
 });
@@ -19,7 +18,6 @@ let cnt = 0;
 let npick = 0;
 let interval = 5000;
 let timerInterval;
-let lastPlayedTime = 0;
 
 function updateDisplay(time) {
   const timerDisplay = document.getElementById('timerDisplay');
@@ -32,18 +30,16 @@ function updateDisplay(time) {
 
 function playAudio(index, muted = false) {
   if (audio[index]) {
-      const currentTime = Date.now();
-      if (currentTime - lastPlayedTime < 200) {
-          console.log('Skipping audio playback due to rapid succession');
-          return;
-      }
-      lastPlayedTime = currentTime;
-
       audio[index].muted = muted;
-      audio[index].currentTime = 0;  // 再生位置をリセット
+      audio[index].currentTime = 0;  // Reset playback position
       const playPromise = audio[index].play();
       if (playPromise !== undefined) {
-          playPromise.catch(e => console.error('Audio playback failed', e));
+          playPromise.catch(e => {
+              console.error('Audio playback failed', e);
+              // Fallback: create a new Audio object and try playing
+              const newAudio = new Audio(audioFiles[index]);
+              newAudio.play().catch(e => console.error('Fallback audio playback failed', e));
+          });
       }
   } else {
       console.error(`Audio file at index ${index} not found`);
@@ -67,7 +63,7 @@ function checktimer(time) {
   cnt = time;
   playAudio(0, true);
   playAudio(3);
-  startOnceCountdown();
+  startCountdown();
 }
 
 function startCountdown() {
@@ -78,12 +74,12 @@ function startCountdown() {
       updateDisplay(cnt);
 
       if (cnt <= 9 && cnt > 0) {
-          playAudio(0);
+          setTimeout(() => playAudio(0), 0);  // Slight delay to improve timing
       }
 
       if (cnt === 0) {
           clearInterval(timerInterval);
-          playAudio(1);
+          setTimeout(() => playAudio(1), 0);  // Slight delay to improve timing
           npick++;
           
           if (npick < picktime.length) {
@@ -94,33 +90,7 @@ function startCountdown() {
   }, 1000);
 }
 
-function startOnceCountdown() {
-  updateDisplay(cnt);
-  
-  timerInterval = setInterval(() => {
-      cnt--;
-      updateDisplay(cnt);
-
-      if (cnt <= 9 && cnt > 0) {
-          playAudio(0);
-      }
-
-      if (cnt === 0) {
-          clearInterval(timerInterval);
-          playAudio(1);
-      }
-  }, 1000);
-}
-
-// Initialize audio and display when DOM is fully loaded
+// Initialize display when DOM is fully loaded
 document.addEventListener('DOMContentLoaded', () => {
-  audio.forEach(a => {
-      a.load();  // 全ての音声ファイルを明示的にロード
-      // iOS Safariでの自動再生制限に対処
-      a.play().then(() => {
-          a.pause();
-          a.currentTime = 0;
-      }).catch(e => console.log('Audio preload failed, but this is okay', e));
-  });
   updateDisplay(0);
 });
