@@ -1,110 +1,66 @@
-//画像を格納する配列の作成
-var image = new Array();
+// Audio files
+const audio = [
+  new Audio('mp3/01_countdown.mp3'),
+  new Audio('mp3/02_draft.mp3'),
+  new Audio('mp3/03_pickup.mp3'),
+  new Audio('mp3/04_pickcheck.mp3')
+];
 
-//配列の各要素を画像に特化して、そのパスを記入
-image[0]=new Image;
-image[0].src="img/0.png";
-image[1]=new Image();
-image[1].src="img/1.png";
-image[2]=new Image();
-image[2].src="img/2.png";
-image[3]=new Image();
-image[3].src="img/3.png";
-image[4]=new Image();
-image[4].src="img/4.png";
-image[5]=new Image();
-image[5].src="img/5.png";
-image[6]=new Image();
-image[6].src="img/6.png";
-image[7]=new Image();
-image[7].src="img/7.png";
-image[8]=new Image();
-image[8].src="img/8.png";
-image[9]=new Image();
-image[9].src="img/9.png";
+let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
+let cnt = 0;
+let npick = 0;
+let interval = 5000;
 
-var audio = new Array();
-audio[0]=new Audio();
-audio[0].src="mp3/01_countdown.mp3";
-audio[1]=new Audio();
-audio[1].src="mp3/02_draft.mp3";
-audio[2]=new Audio();
-audio[2].src="mp3/03_pickup.mp3";
-audio[3]=new Audio();
-audio[3].src="mp3/04_pickcheck.mp3";
+function updateDisplay(time) {
+  const left = Math.floor(time / 10);
+  const right = time % 10;
+  document.getElementById('left').textContent = left;
+  document.getElementById('right').textContent = right;
+}
 
-var picktime=[40,40,35,30,25,25,20,20,15,10,10,5,5,5,5];
-var cnt=0;
-var npick=0;
-var ncheck=0;
-var interval=5000;
-
-function picktimer(npick, isMo)
-{
+function picktimer(npick, isMo) {
   cnt = npick;
-  if(isMo){
-    picktime=[60,50,50,45,40,35,30,25,20,15,10,5,5,5,5];
+  if (isMo) {
+      picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
   }
-  audio[0].muted=true;
+  audio[0].muted = true;
   audio[0].play();
-  audio[1].muted=true;
+  audio[1].muted = true;
   audio[1].play();
   audio[2].play();
   slidesw();
 }
 
-function checktimer(ncheck)
-{
-  //チェックタイム
+function checktimer(ncheck) {
   cnt = ncheck;
-  audio[0].muted=true;
+  audio[0].muted = true;
   audio[0].play();
   audio[3].play();
   slidesw();
 }
 
-function slidesw()
-{
-  //getElementByIdが使える場合のみ後の処理をする
-  if(document.getElementById)
-  {
-    //スライド中はボタンを押せなくする
-    //document.slide.elements[0].disabled=true;
-    //id属性が「sd」の画像タグの画像パスを切り替える
-    var left = Math.floor((cnt / 10) % 10);
-    var right = Math.floor(cnt % 10);
-    document.getElementById("left").src = image[left].src;
-    document.getElementById("right").src = image[right].src;
+function slidesw() {
+  updateDisplay(cnt);
 
-    //一つ画像を表示したらカウント用変数cntの値を＋１にする
-    cnt--;
-    if( cnt <= 9){
-      audio[0].muted=false;
+  cnt--;
+  if (cnt <= 9) {
+      audio[0].muted = false;
       audio[0].play();
-    }
-    
-    if(cnt == -1){
-      audio[1].muted=false;
-      audio[1].play();
-    }
-      
-    //画像が最後まで表示されたか確認
-    if( cnt >= 0 )
-    {
-      //まだ表示されていなければ、setTimeout()で次の画像を表示する
-      var timer1=setTimeout("slidesw()",1000);
-    }
-    else
-    {
-      //全て表示されていたら、ボタンを押せるようにして、タイマーを停止する
-      //document.slide.elements[0].disabled=false;
-      //clearTimeout(timer1);
-      npick++;
+  }
 
-      
-      //intervalの時間は1ピックで200ミリ秒減る
-      var timer2=setTimeout("picktimer(picktime[npick])",interval);
-      interval=interval - 200;
-    }
+  if (cnt === -1) {
+      audio[1].muted = false;
+      audio[1].play();
+  }
+
+  if (cnt >= 0) {
+      setTimeout(slidesw, 1000);
+  } else {
+      npick++;
+      interval = Math.max(interval - 200, 1000); // Ensure interval doesn't go below 1 second
+      setTimeout(() => picktimer(picktime[npick]), interval);
   }
 }
+
+// Initialize display
+updateDisplay(0);

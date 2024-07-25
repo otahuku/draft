@@ -1,52 +1,61 @@
 <!DOCTYPE html>
-<html>
+<html lang="ja">
 <head>
-<meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>DraftTimer</title>
-<meta charset="utf-8">
-<meta name="description" content="ドラフト用タイマー"
-<!-- ビューポートの設定 -->
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="./main.css">
- 
-<!-- href属性にファビコンファイルのURIを記述 -->
-<link rel="shortcut icon" href="">
- 
-<!-- コメントアウトしてあるコードは、iOS/Android用のアイコン指定 -->
-<!--
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="icon" sizes="196x196" href="">
-<link rel="apple-touch-icon" sizes="152x152" href="">
--->
-    
-<link rel="canonical" href="./index.html">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DraftTimer</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/tailwindcss/2.2.19/tailwind.min.css">
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap');
 
-<script src="./timer.js"></script>
+        body {
+            font-family: 'Roboto', sans-serif;
+            background-color: #f0f4f8;
+        }
 
+        .timer-display {
+            font-size: 8rem;
+            line-height: 1;
+        }
+
+        .btn {
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+    </style>
 </head>
-<body>
-<div id="contents">
-	<h2 id="sample">ドラフト用タイマー</h2>
-	<p>
-	ピック間に5秒のインターバルが有ります。
-	</p>
-    
-    <h2>タイマー</h2>
-    <form name="form1" action="">
-       <img src="img/0.png" id="left" width="160" height="240" alt="">
-       <img src="img/0.png" id="right" width="160" height="240" alt="">
-        <br>
-        <form name="slide">
-            <input type="button" value="ピック開始" onclick="picktimer(40, false)">
-            <input type="button" value="ピック開始(長い版)" onclick="picktimer(60, true)">
-            <input type="button" value="チェック開始(60)" onclick="checktimer(60)">
-            <input type="button" value="チェック開始(90)" onclick="checktimer(90)">
-        </form>
-    </form>  
-    
-<!-- スクリプトでブロッキングを起こすものはここに記述
-ブロッキングを起こす原因としては、CSSのセレクタ操作（IE）、負荷の高いDOM操作、多数のスクリプトなど -->
-<!-- SCRIPTS -->
-<!-- 例: <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script> -->
+<body class="bg-gray-100">
+    <div class="container mx-auto px-4 py-8">
+        <h1 class="text-4xl font-bold text-center text-gray-800 mb-8">ドラフト用タイマー</h1>
+        <p class="text-center text-gray-600 mb-8">ピック間に5秒のインターバルがあります。</p>
+
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">タイマー</h2>
+            <div class="flex justify-center items-center mb-8">
+                <div id="timer" class="timer-display text-6xl font-bold text-blue-600">
+                    <span id="left">0</span><span id="right">0</span>
+                </div>
+            </div>
+            <div class="flex flex-wrap justify-center gap-4">
+                <button onclick="picktimer(40, false)" class="btn bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded">
+                    ピック開始
+                </button>
+                <button onclick="picktimer(60, true)" class="btn bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-4 rounded">
+                    ピック開始(長い版)
+                </button>
+                <button onclick="checktimer(60)" class="btn bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-4 rounded">
+                    チェック開始(60)
+                </button>
+                <button onclick="checktimer(90)" class="btn bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-4 rounded">
+                    チェック開始(90)
+                </button>
+            </div>
+        </div>
+    </div>
+    <script src="./timer.js"></script>
 </body>
 </html>
