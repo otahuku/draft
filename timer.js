@@ -1,10 +1,16 @@
 // Audio files
-const audio = [
-  new Audio('mp3/01_countdown.mp3'),
-  new Audio('mp3/02_draft.mp3'),
-  new Audio('mp3/03_pickup.mp3'),
-  new Audio('mp3/04_pickcheck.mp3')
+const audioFiles = [
+  'mp3/01_countdown.mp3',
+  'mp3/02_draft.mp3',
+  'mp3/03_pickup.mp3',
+  'mp3/04_pickcheck.mp3'
 ];
+
+const audio = audioFiles.map(file => {
+  const audioElement = new Audio(file);
+  audioElement.onerror = () => console.error(`Failed to load audio file: ${file}`);
+  return audioElement;
+});
 
 let picktime = [40, 40, 35, 30, 25, 25, 20, 20, 15, 10, 10, 5, 5, 5, 5];
 let cnt = 0;
@@ -14,7 +20,20 @@ let timerInterval;
 
 function updateDisplay(time) {
   const timerDisplay = document.getElementById('timerDisplay');
-  timerDisplay.textContent = time.toString().padStart(2, '0');
+  if (timerDisplay) {
+      timerDisplay.textContent = time.toString().padStart(2, '0');
+  } else {
+      console.error('Timer display element not found');
+  }
+}
+
+function playAudio(index, muted = false) {
+  if (audio[index]) {
+      audio[index].muted = muted;
+      audio[index].play().catch(e => console.error('Audio playback failed', e));
+  } else {
+      console.error(`Audio file at index ${index} not found`);
+  }
 }
 
 function picktimer(time, isMo) {
@@ -23,20 +42,17 @@ function picktimer(time, isMo) {
   if (isMo) {
       picktime = [60, 50, 50, 45, 40, 35, 30, 25, 20, 15, 10, 5, 5, 5, 5];
   }
-  audio[0].muted = true;
-  audio[0].play();
-  audio[1].muted = true;
-  audio[1].play();
-  audio[2].play();
+  playAudio(0, true);
+  playAudio(1, true);
+  playAudio(2);
   startCountdown();
 }
 
 function checktimer(time) {
   clearInterval(timerInterval);
   cnt = time;
-  audio[0].muted = true;
-  audio[0].play();
-  audio[3].play();
+  playAudio(0, true);
+  playAudio(3);
   startCountdown();
 }
 
@@ -48,23 +64,23 @@ function startCountdown() {
       updateDisplay(cnt);
 
       if (cnt <= 9 && cnt > 0) {
-          audio[0].muted = false;
-          audio[0].play();
+          playAudio(0);
       }
 
       if (cnt === 0) {
           clearInterval(timerInterval);
-          audio[1].muted = false;
-          audio[1].play();
+          playAudio(1);
           npick++;
           
           if (npick < picktime.length) {
-              interval = Math.max(interval - 200, 1000); // Ensure interval doesn't go below 1 second
+              interval = Math.max(interval - 200, 1000);
               setTimeout(() => picktimer(picktime[npick], false), interval);
           }
       }
   }, 1000);
 }
 
-// Initialize display
-updateDisplay(0);
+// Initialize display when DOM is fully loaded
+document.addEventListener('DOMContentLoaded', () => {
+  updateDisplay(0);
+});
