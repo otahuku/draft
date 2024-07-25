@@ -119,7 +119,7 @@ function checktimer(time) {
 
 function updateDisplayAndPlayAudio(time) {
   updateDisplay(time);
-  if (time <= 9 & cnt != 0) {
+  if (time <= 10 & time != 0) {
       playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
   }
 }
