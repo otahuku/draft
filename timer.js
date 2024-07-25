@@ -1,3 +1,10 @@
+// 画像を格納する配列の作成
+const images = Array.from({ length: 10 }, (_, i) => {
+  const img = new Image();
+  img.src = `img/${i}.png`;
+  return img;
+});
+
 // 音声ファイルの設定
 const audio = [
   new Audio('mp3/01_countdown.mp3'),
@@ -13,9 +20,14 @@ let interval = 5000;
 let timerInterval;
 
 function updateDisplay(time) {
-  const timerDisplay = document.getElementById('timerDisplay');
-  if (timerDisplay) {
-      timerDisplay.textContent = time.toString().padStart(2, '0');
+  const left = Math.floor(time / 10);
+  const right = time % 10;
+  const leftElement = document.getElementById("left");
+  const rightElement = document.getElementById("right");
+  
+  if (leftElement && rightElement) {
+      leftElement.src = images[left].src;
+      rightElement.src = images[right].src;
   }
 }
 
@@ -36,7 +48,7 @@ function picktimer(time, isMo) {
   playAudio(0, true);
   playAudio(1, true);
   playAudio(2);
-  startCountdown();
+  slidesw();
 }
 
 function checktimer(time) {
@@ -44,31 +56,30 @@ function checktimer(time) {
   cnt = time;
   playAudio(0, true);
   playAudio(3);
-  startCountdown();
+  slidesw();
 }
 
-function startCountdown() {
+function slidesw() {
   updateDisplay(cnt);
   
-  timerInterval = setInterval(() => {
-      cnt--;
-      updateDisplay(cnt);
-
-      if (cnt <= 9 && cnt > 0) {
-          playAudio(0);
+  cnt--;
+  if (cnt <= 9 && cnt >= 0) {
+      playAudio(0);
+  }
+  
+  if (cnt === -1) {
+      playAudio(1);
+  }
+  
+  if (cnt >= 0) {
+      timerInterval = setTimeout(slidesw, 1000);
+  } else {
+      npick++;
+      if (npick < picktime.length) {
+          interval = Math.max(interval - 200, 1000);
+          setTimeout(() => picktimer(picktime[npick], false), interval);
       }
-
-      if (cnt === 0) {
-          clearInterval(timerInterval);
-          playAudio(1);
-          npick++;
-          
-          if (npick < picktime.length) {
-              interval = Math.max(interval - 200, 1000);
-              setTimeout(() => picktimer(picktime[npick], false), interval);
-          }
-      }
-  }, 1000);
+  }
 }
 
 // 初期表示
