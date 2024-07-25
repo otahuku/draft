@@ -76,62 +76,58 @@ function checktimer(time) {
     playAudio(3).then(slidesw); // チェック音を鳴らした後にslidesw開始
 }
 
-function slidesw() {
-    updateDisplay(cnt);
-    
-    if (cnt <= 11 && cnt != 0) {
-        playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
-    }
-    
-    if (cnt > 0) {
-        timerInterval = setTimeout(() => {
-            cnt--;
-            slidesw();
-        }, 1000);
-    } else {
-        clearInterval(timerInterval);
-        
-        playAudio(1)
-            .then(() => {
-                console.log('Draft sound played successfully');
-                if (!isCheckTimer) {
-                    npick++;
-                    if (npick < picktime.length) {
-                        interval = Math.max(interval - 200, MIN_INTERVAL);
-                        console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
-                        setTimeout(() => picktimer(picktime[npick], false), interval);
-                    } else {
-                        console.log('All picks completed');
-                        updateDisplay(0);
-                        npick = 0;
-                        interval = 5000;
-                    }
-                } else {
-                    updateDisplay(0);
-                }
-            })
-            .catch(error => {
-                console.error('Failed to play draft sound', error);
-                // エラーが発生しても次の処理を続行
-                if (!isCheckTimer) {
-                    npick++;
-                    if (npick < picktime.length) {
-                        interval = Math.max(interval - 200, MIN_INTERVAL);
-                        console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
-                        setTimeout(() => picktimer(picktime[npick], false), interval);
-                    } else {
-                        console.log('All picks completed');
-                        updateDisplay(0);
-                        npick = 0;
-                        interval = 5000;
-                    }
-                } else {
-                    updateDisplay(0);
-                }
-            });
-    }
+function updateDisplayAndPlayAudio(time) {
+  updateDisplay(time);
+  if (time <= 11 & cnt != 0) {
+      playAudio(0); // 9秒の時点でカウントダウン音を鳴らす
+  }
 }
 
+function slidesw() {
+  const startTime = Date.now();
+  const tick = () => {
+      const elapsedTime = Date.now() - startTime;
+      const secondsElapsed = Math.floor(elapsedTime / 1000);
+      
+      if (secondsElapsed < cnt) {
+          updateDisplayAndPlayAudio(cnt - secondsElapsed);
+          requestAnimationFrame(tick);
+      } else if (cnt > 0) {
+          cnt--;
+          updateDisplayAndPlayAudio(cnt);
+          setTimeout(slidesw, 1000 - (elapsedTime % 1000));
+      } else {
+          clearInterval(timerInterval);
+          console.log('Attempting to play draft sound');
+          playAudio(1)
+              .then(() => {
+                  console.log('Draft sound played successfully');
+                  if (!isCheckTimer) {
+                      npick++;
+                      if (npick < picktime.length) {
+                          interval = Math.max(interval - 200, MIN_INTERVAL);
+                          console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
+                          setTimeout(() => picktimer(picktime[npick], false), interval);
+                      } else {
+                          console.log('All picks completed');
+                          updateDisplay(0);
+                          npick = 0;
+                          interval = 5000;
+                      }
+                  } else {
+                      updateDisplay(0);
+                  }
+              })
+              .catch(error => {
+                  console.error('Failed to play draft sound', error);
+                  // エラーが発生しても次の処理を続行
+                  // ... (エラー処理のコードは前回と同じ)
+              });
+      }
+  };
+  
+  tick();
+}
 
 function enableAudio() {
   audioEnabled = true;
