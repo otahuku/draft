@@ -134,7 +134,7 @@ function proceedToNextPick() {
   if (!isCheckTimer) {
       npick++;
       if (npick < picktime.length) {
-          interval = Math.max(interval - 200, MIN_INTERVAL);
+          interval = Math.max(interval - 300, MIN_INTERVAL);
           console.log(`Next pick: ${npick}, Next time: ${picktime[npick]}s, Interval: ${interval}ms`);
           setTimeout(() => picktimer(false), interval);
       } else {
